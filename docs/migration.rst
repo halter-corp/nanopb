@@ -137,6 +137,44 @@ which work both in 0.4.0 and 0.3.9.
 
 **Error indications:** Error message from `pb_decode()`: 'zero_tag'.
 
+Submessages now have has_field in proto3 mode
+---------------------------------------------
+**Rationale:** Previously nanopb considered proto3 submessages as 'present' only
+when their contents was non-zero. Most other protobuf libraries allow explicit
+'null' state for submessages.
+
+**Changes:** Submessages now have separate `has_field` in proto3 mode also.
+
+**Required actions:** When using submessages in proto3 mode, user code must now
+set `mymsg.has_submsg = true` for each submessage that is present. Alternatively,
+the field option `proto3_singular_msgs` can be used to restore the old behavior.
+
+**Error indications:** Submessages do not get encoded.
+
+PB_OLD_CALLBACK_STYLE option has been removed
+---------------------------------------------
+**Rationale:** Back in 2013, function signature for callbacks was changed. The
+`PB_OLD_CALLBACK_STYLE` option allowed compatibility with old code, but
+complicated code and testing because of the different options.
+
+**Changes:** `PB_OLD_CALLBACK_STYLE` option no-longer has any effect.
+
+**Required actions:** If `PB_OLD_CALLBACK_STYLE` option was in use previously,
+function signatures must be updated to use double pointers (`void**` and
+`void * const *`).
+
+**Error indications:** Assignment from incompatible pointer type.
+
+protoc insertion points are no longer included by default
+---------------------------------------------------------
+**Rationale:** Protoc allows including comments in form `@@protoc_insertion_point`
+to identify locations for other plugins to insert their own extra content.
+Previously these were included by default, but they clutter the generated files
+and are rarely used.
+
+**Changes:** Insertion points are now included only when `--protoc-insertion-points`
+option is passed to the generator.
+
 Nanopb-0.3.9.4, 0.4.0 (2019-xx-xx)
 ==================================
 
@@ -153,6 +191,22 @@ define always has the largest value.
 **Required actions:** If these defines are used and enum values in .proto file
 are not defined in ascending order, user code behaviour may change. Check that
 user code doesn't expect the old, incorrect first/last behaviour.
+
+Fix undefined behavior related to bool fields
+---------------------------------------------
+
+**Rationale:** In C99, `bool` variables are not allowed to have other values
+than `true` and `false`. Compilers use this fact in optimization, and constructs
+like `int foo = msg.has_field ? 100 : 0` will give unexpected results otherwise.
+Previously nanopb didn't enforce that decoded bool fields had valid values.
+
+**Changes:** Bool fields are now handled separately as `PB_LTYPE_BOOL`. The
+`LTYPE` descriptor numbers for other field types were renumbered.
+
+**Required actions:** Source code files must be recompiled, but regenerating
+`.pb.h`/`.pb.c` files from `.proto` is not required. If user code directly uses
+the nanopb internal field representation (search for `PB_LTYPE_VARINT` in source),
+it may need updating.
 
 Nanopb-0.3.9.1, 0.4.0 (2018-04-14)
 ==================================

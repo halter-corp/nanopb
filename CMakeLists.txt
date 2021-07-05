@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12)
 
 project(nanopb C)
 
-set(nanopb_VERSION_STRING nanopb-0.4.0-dev)
+set(nanopb_VERSION_STRING nanopb-0.4.2-dev)
 set(nanopb_SOVERSION 0)
 
 string(REPLACE "nanopb-" "" nanopb_VERSION ${nanopb_VERSION_STRING})
@@ -79,7 +79,8 @@ if(nanopb_BUILD_RUNTIME)
             SOVERSION ${nanopb_SOVERSION})
         install(TARGETS protobuf-nanopb EXPORT nanopb-targets
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+	    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
         target_include_directories(protobuf-nanopb INTERFACE
           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         )

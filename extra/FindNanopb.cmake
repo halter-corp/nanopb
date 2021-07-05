@@ -216,7 +216,7 @@ function(NANOPB_GENERATE_CPP SRCS HDRS)
     set(NANOPB_OPTIONS_DIRS)
 
     # If there an options file in the same working directory, set it as a dependency
-    set(NANOPB_OPTIONS_FILE ${FIL_DIR}/${FIL_WE}.options)
+    set(NANOPB_OPTIONS_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${FIL_DIR}/${FIL_WE}.options)
     if(EXISTS ${NANOPB_OPTIONS_FILE})
         # Get directory as lookups for dependency options fail if an options
         # file is used. The options is still set as a dependency of the
@@ -256,7 +256,8 @@ function(NANOPB_GENERATE_CPP SRCS HDRS)
       ARGS -I${GENERATOR_PATH} -I${GENERATOR_CORE_DIR}
            -I${CMAKE_CURRENT_BINARY_DIR} ${_nanopb_include_path}
            --plugin=protoc-gen-nanopb=${NANOPB_GENERATOR_PLUGIN}
-           "--nanopb_out=${NANOPB_PLUGIN_OPTIONS}:${CMAKE_CURRENT_BINARY_DIR}/${FIL_PATH_REL}" ${ABS_FIL}
+           "--nanopb_opt=${NANOPB_PLUGIN_OPTIONS}"
+           "--nanopb_out=${CMAKE_CURRENT_BINARY_DIR}/${FIL_PATH_REL}" ${ABS_FIL}
       DEPENDS ${ABS_FIL} ${GENERATOR_CORE_PYTHON_SRC}
            ${NANOPB_OPTIONS_FILE} ${NANOPB_DEPENDS}
       COMMENT "Running C++ protocol buffer compiler using nanopb plugin on ${FIL}"
@@ -334,10 +335,8 @@ find_path(NANOPB_GENERATOR_SOURCE_DIR
 )
 mark_as_advanced(NANOPB_GENERATOR_SOURCE_DIR)
 
-find_package(PythonInterp REQUIRED)
-
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(NANOPB DEFAULT_MSG
+find_package_handle_standard_args(Nanopb DEFAULT_MSG
   NANOPB_INCLUDE_DIRS
   NANOPB_SRCS NANOPB_HDRS
   NANOPB_GENERATOR_SOURCE_DIR

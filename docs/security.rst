@@ -29,7 +29,7 @@ security issues, such as execution of arbitrary code:
 1. Callback, pointer and extension fields in message structures given to
    pb_encode() and pb_decode(). These fields are memory pointers, and are
    generated depending on the message definition in the .proto file.
-2. The automatically generated field definitions, i.e. *pb_field_t* lists.
+2. The automatically generated field definitions, i.e. *pb_msgdesc_t*.
 3. Contents of the *pb_istream_t* and *pb_ostream_t* structures (this does not
    mean the contents of the stream itself, just the stream definition).
 
@@ -58,6 +58,7 @@ untrusted data has been maliciously crafted:
    - The *count* fields of arrays will not exceed the array size.
    - The *size* field of bytes will not exceed the allocated size.
    - All string fields will have null terminator.
+   - bool fields will have valid true/false values (since nanopb-0.3.9.4)
 
 5. After pb_encode() returns successfully, the resulting message is a valid
    protocol buffers message. (Except if user-defined callbacks write incorrect

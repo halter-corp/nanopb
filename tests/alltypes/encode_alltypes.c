@@ -8,6 +8,9 @@
 #include "alltypes.pb.h"
 #include "test_helpers.h"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int main(int argc, char **argv)
 {
     int mode = (argc > 1) ? atoi(argv[1]) : 0;
@@ -73,6 +76,8 @@ int main(int argc, char **argv)
         alltypes.rep_fbytes_count = 5;
         memcpy(alltypes.rep_fbytes[4], "2019", 4);
         
+        alltypes.rep_farray[4] = 2040;
+
         alltypes.req_limits.int32_min  = INT32_MIN;
         alltypes.req_limits.int32_max  = INT32_MAX;
         alltypes.req_limits.uint32_min = 0;
@@ -83,6 +88,17 @@ int main(int argc, char **argv)
         alltypes.req_limits.uint64_max = UINT64_MAX;
         alltypes.req_limits.enum_min   = HugeEnum_Negative;
         alltypes.req_limits.enum_max   = HugeEnum_Positive;
+        alltypes.req_limits.largetag   = 1001;
+
+        alltypes.req_ds8.first = 9991;
+        alltypes.req_ds8.second = 9992;
+
+        alltypes.req_intsizes.req_int8 = -128;
+        alltypes.req_intsizes.req_uint8 = 255;
+        alltypes.req_intsizes.req_sint8 = -128;
+        alltypes.req_intsizes.req_int16 = -32768;
+        alltypes.req_intsizes.req_uint16 = 65535;
+        alltypes.req_intsizes.req_sint16 = -32768;
     }
     
     if (mode == 1)
