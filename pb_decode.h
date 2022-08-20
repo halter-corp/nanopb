@@ -96,9 +96,9 @@ bool pb_decode(pb_istream_t *stream, const pb_msgdesc_t *fields, void *dest_stru
  *
  * Multiple flags can be combined with bitwise or (| operator)
  */
-#define PB_DECODE_NOINIT          0x01
-#define PB_DECODE_DELIMITED       0x02
-#define PB_DECODE_NULLTERMINATED  0x04
+#define PB_DECODE_NOINIT          0x01U
+#define PB_DECODE_DELIMITED       0x02U
+#define PB_DECODE_NULLTERMINATED  0x04U
 bool pb_decode_ex(pb_istream_t *stream, const pb_msgdesc_t *fields, void *dest_struct, unsigned int flags);
 
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
@@ -113,6 +113,9 @@ bool pb_decode_ex(pb_istream_t *stream, const pb_msgdesc_t *fields, void *dest_s
  * pb_decode() returns with an error, the message is already released.
  */
 void pb_release(const pb_msgdesc_t *fields, void *dest_struct);
+#else
+/* Allocation is not supported, so release is no-op */
+#define pb_release(fields, dest_struct) PB_UNUSED(fields); PB_UNUSED(dest_struct);
 #endif
 
 
@@ -122,10 +125,13 @@ void pb_release(const pb_msgdesc_t *fields, void *dest_struct);
 
 /* Create an input stream for reading from a memory buffer.
  *
+ * msglen should be the actual length of the message, not the full size of
+ * allocated buffer.
+ *
  * Alternatively, you can use a custom stream that reads directly from e.g.
  * a file or a network socket.
  */
-pb_istream_t pb_istream_from_buffer(const pb_byte_t *buf, size_t bufsize);
+pb_istream_t pb_istream_from_buffer(const pb_byte_t *buf, size_t msglen);
 
 /* Function to read from a pb_istream_t. You can use this if you need to
  * read some custom header data, or to read data in field callbacks.
@@ -144,7 +150,7 @@ bool pb_decode_tag(pb_istream_t *stream, pb_wire_type_t *wire_type, uint32_t *ta
 /* Skip the field payload data, given the wire type. */
 bool pb_skip_field(pb_istream_t *stream, pb_wire_type_t wire_type);
 
-/* Decode an integer in the varint format. This works for bool, enum, int32,
+/* Decode an integer in the varint format. This works for enum, int32,
  * int64, uint32 and uint64 field types. */
 #ifndef PB_WITHOUT_64BIT
 bool pb_decode_varint(pb_istream_t *stream, uint64_t *dest);
@@ -152,9 +158,12 @@ bool pb_decode_varint(pb_istream_t *stream, uint64_t *dest);
 #define pb_decode_varint pb_decode_varint32
 #endif
 
-/* Decode an integer in the varint format. This works for bool, enum, int32,
+/* Decode an integer in the varint format. This works for enum, int32,
  * and uint32 field types. */
 bool pb_decode_varint32(pb_istream_t *stream, uint32_t *dest);
+
+/* Decode a bool value in varint format. */
+bool pb_decode_bool(pb_istream_t *stream, bool *dest);
 
 /* Decode an integer in the zig-zagged svarint format. This works for sint32
  * and sint64. */
@@ -172,6 +181,11 @@ bool pb_decode_fixed32(pb_istream_t *stream, void *dest);
 /* Decode a fixed64, sfixed64 or double value. You need to pass a pointer to
  * a 8-byte wide C variable. */
 bool pb_decode_fixed64(pb_istream_t *stream, void *dest);
+#endif
+
+#ifdef PB_CONVERT_DOUBLE_FLOAT
+/* Decode a double value into float variable. */
+bool pb_decode_double_as_float(pb_istream_t *stream, float *dest);
 #endif
 
 /* Make a limited-length substream for reading a PB_WT_STRING field. */
